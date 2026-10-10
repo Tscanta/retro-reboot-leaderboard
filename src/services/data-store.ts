@@ -362,17 +362,28 @@ export const DataStore = {
     return updated;
   },
 
-  async getGames(): Promise<Game[]> {
-    if (isSupabaseConfigured()) {
-      const supa = createAdminClient();
-      const { data } = await supa.from("games").select("*").order("name");
-      if (data && data.length > 0) {
-        memGames = data;
-        return data;
-      }
+
+async getGames(): Promise<Game[]> {
+  if (isSupabaseConfigured()) {
+    const supa = createAdminClient();
+
+    const { data, error } = await supa
+      .from("games")
+      .select("*")
+      .order("name")
+      .range(0, 999);
+
+    if (error) {
+      throw new Error(`Failed to load games: ${error.message}`);
     }
-    return [...memGames];
-  },
+
+    memGames = data ?? [];
+    return memGames;
+  }
+
+  return [...memGames];
+},
+
 
   async getGameById(id: string): Promise<Game | null> {
     if (isSupabaseConfigured()) {
@@ -711,30 +722,40 @@ export const DataStore = {
     return list.slice(0, limit).map(populateAttempt);
   },
 
-  async getAllScoreAttempts(): Promise<ScoreAttempt[]> {
-    if (isSupabaseConfigured()) {
-      const supa = createAdminClient();
-      const { data, error } = await supa
-        .from("score_attempts")
-        .select("*, player:players(*), game:games(*)")
-        .order("created_at", { ascending: false });
-      if (!error && data && data.length > 0) {
-        return data.map((d: any) => ({
-          ...d,
-          volunteer: {
-            id: d.volunteer_id,
-            display_name: "Volunteer",
-            role: "volunteer",
-            volunteer_code: "VOL-01",
-            is_active: true,
-            created_at: d.created_at,
-            updated_at: d.updated_at,
-          },
-        }));
-      }
+
+async getAllScoreAttempts(): Promise<ScoreAttempt[]> {
+  if (isSupabaseConfigured()) {
+    const supa = createAdminClient();
+
+    const { data, error } = await supa
+      .from("score_attempts")
+      .select("*, player:players(*), game:games(*)")
+      .order("created_at", { ascending: false })
+      .range(0, 999);
+
+    if (error) {
+      throw new Error(
+        `Failed to load score attempts: ${error.message}`
+      );
     }
-    return memScoreAttempts.map(populateAttempt);
-  },
+
+    return (data ?? []).map((d: any) => ({
+      ...d,
+      volunteer: {
+        id: d.volunteer_id,
+        display_name: "Volunteer",
+        role: "volunteer",
+        volunteer_code: "VOL-01",
+        is_active: true,
+        created_at: d.created_at,
+        updated_at: d.updated_at,
+      },
+    }));
+  }
+
+  return memScoreAttempts.map(populateAttempt);
+},
+
 
   async createCorrectionRequest(params: {
     original_attempt_id: string;
