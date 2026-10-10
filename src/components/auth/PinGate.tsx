@@ -153,9 +153,6 @@ export function PinGate({ role, onSuccess }: PinGateProps) {
           <div>
             <label className="block text-xs font-medium text-slate-300 mb-1.5 flex items-center justify-between">
               <span>{role === "admin" ? "6-Digit Admin Master PIN" : "4-Digit Volunteer PIN"}</span>
-              <span className="text-[11px] text-slate-500 font-mono">
-                Default demo PIN: <strong className="text-cogaan-gold">{defaultPinHint}</strong>
-              </span>
             </label>
             <div className="relative">
               <Lock className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
