@@ -40,7 +40,16 @@ export function PinGate({ role, onSuccess }: PinGateProps) {
       const res = await fetch("/api/auth/pin-verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ role, pin }),
+        body: JSON.stringify({
+        role,
+        pin,
+        ...(role === "volunteer"
+          ? {
+              volunteerName: volunteerName.trim(),
+              volunteerCode: volunteerCode.trim(),
+            }
+          : {}),
+      }),
       });
 
       const data = await res.json();

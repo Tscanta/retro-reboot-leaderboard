@@ -104,4 +104,6 @@ export const scoreCorrectionSchema = z
 export const pinVerificationSchema = z.object({
   role: z.enum(["admin", "volunteer"]),
   pin: z.string().min(4).max(6),
+  volunteerName: z.string().trim().min(1).max(100).optional(),
+  volunteerCode: z.string().trim().min(1).max(50).optional(),
 });
